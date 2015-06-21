@@ -1,57 +1,75 @@
---import gameboard exposing (board)
-import List exposing (length, repeat, map)
-import Graphics.Element exposing (show, Element)
-import Time exposing (every, second)
+import gameboard exposing (board)
+import List exposing (length, repeat, map, indexedMap, head, drop, foldl, sum)
+import Graphics.Element exposing (show, Element, flow, down, right)
+import Time exposing (every, second, fps)
 import Window exposing (dimensions)
+import Graphics.Collage exposing (collage, filled, rect)
+import Color exposing (..)
+import Maybe
 
 -- Model
 type alias GameState = List (List Bool)
-
-board : GameState
-board = 
-    [
-        [0,0,0,0,0,0,0,0,0]
-       ,[0,0,0,0,0,0,0,0,0]
-       ,[0,0,0,0,0,0,0,0,0]
-       ,[0,0,0,0,0,0,0,0,0]
-       ,[0,0,0,0,0,0,0,0,0]
-       ,[0,0,0,0,0,0,0,0,0]
-       ,[0,0,0,0,0,0,0,0,0]
-       ,[0,0,0,0,0,0,0,0,0]
-       ,[0,0,0,0,0,0,0,0,0]
-    ]
 
 -- Update
 step : Float -> GameState -> GameState
 step t gameState =
   let
-   -- 1. Create a new 2-dimensional list with a 0 border (List will now be of dimension (n+1)x(n+1))
-        -- This represents the top and bottom lines
-        additionalLine : List Bool
-        additionalLine = repeat ((length gameState) + 1) 0
-        -- This represents the middle lines
-        middleLines : List (List Bool)
-        middleLines = map (\l -> 0 :: (l ++ [0])) gameState
-        -- Concatenate the lists
-        gameStateWithBorder = additionalLine :: (middleLines ++ [additionalLine])
-   -- 2. Map some recursive foldl take3 + to the list
-   gameStateNfoldl (+) 0 (foldl (+) 0 <| take 3 gameStateWithBorder)
-   -- 3. Map the counting function to the list
-  in
-    gameStateWithBorder
+    -- Map the board indexes to each position
+    gameStateIndexes : List (List ((Int,Int), Bool))
+    gameStateIndexes = List.map (\(y,l) -> (List.map (\(x,e) -> ((x,y), e)) l)) (List.indexedMap (,) (List.map (List.indexedMap (,)) gameState)) -- [[((0,0),False)],[((0,1), False)]]
+    -- Create a function to tell whether a given cell will live
+    cellLives : List (List ((Int,Int), Bool)) -> (Int,Int) -> Bool
+    cellLives boardList (x,y) =
+      let 
+        -- This function takes boardList and and (x,y) and returns the index of the list at (x,y)
+        getAtXY l (x,y) = (head (drop y l)) `Maybe.andThen` (\a -> (head (drop x a))) |> Maybe.withDefault ((0,0),False)
+        -- Create a list of neigbours relative to a position
+        neighbours = [(x-1,y-1), (x,y-1), (x+1,y-1), (x-1,y), (x+1, y), (x-1,y+1), (x,y+1), (x+1,y+1)]
+        -- Map the list of neigbours with whether or not that position is on
+        neighboursAlive = (map (getAtXY boardList >> snd) neighbours)
+        -- Convert the list from Bool to Int
+        neighboursAliveInt = map (\a -> if a then 1 else 0) neighboursAlive
+        -- Get the sum of the list
+        numAliveNeighbours = sum neighboursAliveInt
+        -- Get whether the current cell is alive
+        curCellAlive = snd (getAtXY boardList (x,y))
+        -- This function returns whether a cell lives based on its alive neighbours and whether it is already alive
+        cellRules : Int -> Bool -> Bool
+        cellRules aliveNeighbours isAlive =
+          if isAlive
+          then 
+              if
+              | aliveNeighbours < 2 -> False
+              | aliveNeighbours > 3 -> False
+              | otherwise -> True -- == 2 || 3
+          else
+              aliveNeighbours == 3
+     in
+       -- Return whether the cell will die based on the list sum, and if it already alive
+       cellRules numAliveNeighbours curCellAlive
+   in
+     map (\l -> (map (\((x,y),a) -> (cellLives gameStateIndexes (x,y))) l)) gameStateIndexes
     
-
 -- View
 view : (Int, Int) -> GameState -> Element
 view (w,h) gameState =
-   -- flow down (map flow right gameState)
-   show gameState
+  let 
+    drawBlock w b list =
+      let 
+        c = if b then white else black
+        size = (w//(length list))
+        sizeFloat  = toFloat size 
+      in
+        collage size size [filled c (rect sizeFloat sizeFloat)]
+    mappedElements = map (\l -> (map (\e -> (drawBlock w e gameState)) l)) gameState
+  in
+    flow down (map (flow right) mappedElements)
 
 
 -- Putting it all together (Signal)
 gameState : Signal GameState
 gameState =
-    Signal.foldp step board (every second)
+    Signal.foldp step board (fps 5)
 
 
 main : Signal Element
