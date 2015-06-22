@@ -54,6 +54,7 @@ step t gameState =
 view : (Int, Int) -> GameState -> Element
 view (w,h) gameState =
   let 
+    listSize = length gameState
     drawBlock w b list =
       let 
         c = if b then white else black
@@ -61,7 +62,7 @@ view (w,h) gameState =
         sizeFloat  = toFloat size 
       in
         collage size size [filled c (rect sizeFloat sizeFloat)]
-    mappedElements = map (\l -> (map (\e -> (drawBlock w e gameState)) l)) gameState
+    mappedElements = map (\l -> (map (\e -> (drawBlock w e listSize)) l)) gameState
   in
     flow down (map (flow right) mappedElements)
 
