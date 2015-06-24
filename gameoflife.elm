@@ -55,10 +55,10 @@ view : (Int, Int) -> GameState -> Element
 view (w,h) gameState =
   let 
     listSize = length gameState
-    drawBlock w b list =
+    drawBlock w b listSize =
       let 
         c = if b then white else black
-        size = (w//(length list))
+        size = (w//listSize)
         sizeFloat  = toFloat size 
       in
         collage size size [filled c (rect sizeFloat sizeFloat)]
