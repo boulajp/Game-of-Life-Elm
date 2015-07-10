@@ -1,7 +1,8 @@
+module GameBoard (board) where 
+
 {-
     By default, the board is a gosper glider gun
 -}
-
 
 board : List (List Bool)
 board =
