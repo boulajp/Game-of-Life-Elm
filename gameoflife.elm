@@ -1,4 +1,4 @@
-import gameboard exposing (board)
+import GameBoard exposing (board)
 import List exposing (length, repeat, map, indexedMap, head, drop, foldl, sum)
 import Graphics.Element exposing (show, Element, flow, down, right)
 import Time exposing (every, second, fps)
