@@ -10,4 +10,4 @@ Once the Elm core is installed, "gameoflife.elm" can either be compiled or ran t
 
 ## Sample
 The game board starts off as a [Gosper Glider Gun](http://www.conwaylife.com/wiki/Gosper_glider_gun) 
-![](https://raw.githubusercontent.com/jpatomic96/Game-of-Life-Elm/master/glider-gun.png)
+![](https://raw.githubusercontent.com/jpatomic96/Game-of-Life-Elm/master/glider-gun.gif)
