@@ -9,5 +9,5 @@ This was written in Elm 0.15, and will not work in later versions, therefore, yo
 Once the Elm core is installed, "gameoflife.elm" can either be compiled or ran through elm-reactor
 
 ## Sample
-The game board starts off as a ![Gosper Glider Gun](http://www.conwaylife.com/wiki/Gosper_glider_gun) 
-![](https://raw.githubusercontent.com/jpatomic96/Game-of-Life-Elm/master/Images/glider-gun.png)
+The game board starts off as a [Gosper Glider Gun](http://www.conwaylife.com/wiki/Gosper_glider_gun) 
+![](https://raw.githubusercontent.com/jpatomic96/Game-of-Life-Elm/master/glider-gun.png)
